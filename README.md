@@ -33,7 +33,7 @@ A: For some reason anything larger than this and the game simply wont load the b
 
 Q: What is the BlocksCache.json file for?
 
-A: To promote speed and so I dont have to manualy add the blocks the game has, SMBIC will create a json file containing all of the blocks (Wood, Metal, Concreate) with names and UUID's (Way the game and mods identify blocks and parts)
+A: To promote speed and so I dont have to manualy add the blocks the game has, SMBIC will create a json file containing all of the blocks (Wood, Metal, Concreate) names and UUID's (Way the game and mods identify blocks and parts)
 
 
 Q: Have a suggestion or having troubles with SMBIC?
