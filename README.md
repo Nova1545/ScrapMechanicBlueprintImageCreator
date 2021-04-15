@@ -30,13 +30,16 @@ Q: Why is the size of the blueprinted image limited to 256x256?
 
 A: For some reason anything larger than this and the game simply wont load the blueprint, I dont know why and Ive tried to get around this but have yet to find a way
 
+
 Q: What is the BlocksCache.json file for?
 
 A: To promote speed and so I dont have to manualy add the blocks the game has, SMBIC will create a json file containing all of the blocks (Wood, Metal, Concreate) with names and UUID's (Way the game and mods identify blocks and parts)
 
+
 Q: Have a suggestion or having troubles with SMBIC?
 
 A: Create an issue through github with your problem or suggestion
+
 
 Q: Game update? New Blocks added? Want to use them for the building block of your image?
 
