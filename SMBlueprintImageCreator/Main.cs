@@ -73,7 +73,7 @@ namespace SMBlueprintImageCreator
                         // Create new blueprint
                         Directory.CreateDirectory(path);
                         JObject description = new();
-                        description["description"] = $"Created using SMBIC by Aiden Wilkins (SuperNova15)\nSize: {bm.Width}x{bm.Height}";
+                        description["description"] = $"Created using SMBIC by Nova1545 (https://github.com/Nova1545/ScrapMechanicBlueprintImageCreator)\nSize: {bm.Width}x{bm.Height}";
                         description["localId"] = uuid;
                         description["name"] = name;
                         description["type"] = "Blueprint";
