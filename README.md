@@ -3,6 +3,11 @@ Takes images and turns them into blueprints you can then spawn in your Scrap Mec
 
 Scrap Mechanic Blueprint Image Creator (SMBIC)
 
+Installing:
+1. Download SMBIC.zip from releases
+2. Unzip SMBIC.zip
+3. Run SMBlueprintImageCreator
+
 Normal Use:
 1. Select image of choice
 2. Pick size (between 0 and 256) for both width and height
