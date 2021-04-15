@@ -42,3 +42,5 @@ A: Create an issue through github with your problem or suggestion
 Q: Game update? New Blocks added? Want to use them for the building block of your image?
 
 A: Simply just delete the BlocksCache.json file and restart the SMBIC
+
+If you use this to create a blueprint of an image please credit the github by simply linking it in the description, it would be much appreciated
