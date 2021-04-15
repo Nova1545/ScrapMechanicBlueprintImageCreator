@@ -22,7 +22,7 @@ This is in the case where you have installed Scrap Mechanic to somewhere else ot
 4. Click Create!
 5. Open Scrap Mechanic and search for the name of the blueprint in your lift
 
-Video: Coming soon
+Setup and use Video: Coming Soon!
 
 QA:
 
