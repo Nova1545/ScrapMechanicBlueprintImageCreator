@@ -3,6 +3,13 @@ Takes images and turns them into blueprints you can then spawn in your Scrap Mec
 
 Scrap Mechanic Blueprint Image Creator (SMBIC)
 
+Things current in progress:
+- Reworking the entire blueprint generation
+- Larger blueprints (Hopefully)
+- Limiting to in game color pallete (By choice)
+- "Hot-reload" of blueprints
+
+
 Installing:
 1. Download SMBIC.zip from [releases](https://github.com/Nova1545/ScrapMechanicBlueprintImageCreator/releases/tag/1.0)
 2. Unzip SMBIC.zip
