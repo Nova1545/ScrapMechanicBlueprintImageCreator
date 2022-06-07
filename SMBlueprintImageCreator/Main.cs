@@ -36,144 +36,31 @@ namespace SMBlueprintImageCreator
             GameDirDialog.SelectedPath = "";
         }
 
-        /*private void CreateBlueprint_Click(object sender, EventArgs e)
-        {
-            if (LoadedImage)
-            {
-                if (Working)
-                {
-                    OpenInfoDialog("Please wait for the current blueprint to finish...");
-                    return;
-                }
-                if (BlockType.SelectedItem == null)
-                {
-                    OpenInfoDialog("Please select a block type");
-                    return;
-                }
-                Working = true;
-                BlueprintName bn = new();
-                bn.Location = this.Location + ((this.Size / 2) - (bn.Size / 2));
-                if (bn.ShowDialog() == DialogResult.OK)
-                {
-                    this.Enabled = false;
-                    Waiting w = new("Creating blueprint...");
-                    w.Location = this.Location + ((this.Size / 2) - (w.Size / 2));
-                    w.Show(this);
-                    w.TopMost = true;
-                    w.Focus();
-
-                    ThreadPool.QueueUserWorkItem((g) =>
-                    {
-                        string name = bn.NameBlu;
-                        string uuid = Guid.NewGuid().ToString();
-
-                        string userPath = @$"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\Axolot Games\Scrap Mechanic\User";
-                        string path = $@"{Directory.GetDirectories(userPath)[0]}\Blueprints\{uuid}";
-
-                        // Rescale image
-                        Bitmap bm = Rescale(new Bitmap(ImagePath), (int)Width.Value, (int)Height.Value);
-
-                        // Create new blueprint
-                        Directory.CreateDirectory(path);
-                        JObject description = new();
-                        description["description"] = $"Created using SMBIC by Nova1545 (https://github.com/Nova1545/ScrapMechanicBlueprintImageCreator)\nSize: {bm.Width}x{bm.Height}";
-                        description["localId"] = uuid;
-                        description["name"] = name;
-                        description["type"] = "Blueprint";
-                        description["version"] = 0;
-                        File.WriteAllText($@"{path}\description.json", description.ToString());
-
-                        // Create icon file
-                        CreateIcon(new Bitmap(ImagePath)).Save($@"{path}\icon.png");
-
-                        JObject childs = new();
-                        childs["childs"] = new JArray();
-
-                        string blockUUID = "a6c6ce30-dd47-4587-b475-085d55c6a3b4";
-                        Invoke(new MethodInvoker(delegate () { blockUUID = Blocks.First(x => x.Name == BlockType.SelectedItem.ToString()).UUID; }));
-
-
-                        int x = 0;
-                        foreach (ChunkInfo chunk in FindSquareOfSimilarPixels(bm))
-                        {
-                            x++;
-
-                            // Single child
-                            JObject pos = new();
-                            pos["x"] = chunk.XOffset;
-                            pos["y"] = 0;
-                            pos["z"] = (bm.Height - 1) - chunk.ZOffset;
-
-                            string hex = chunk.Color.R.ToString("X2") + chunk.Color.G.ToString("X2") + chunk.Color.B.ToString("X2");
-
-                            JObject bounds = new();
-                            bounds["x"] = chunk.Length;
-                            bounds["y"] = 1;
-                            bounds["z"] = 1;
-
-                            JObject child = new();
-                            child["bounds"] = bounds;
-                            child["color"] = hex;
-                            child["pos"] = pos;
-
-                            // Concrate
-                            child["shapeId"] = blockUUID;
-                            // Glass
-                            //child["shapeId"] = "5f41af56-df4c-4837-9b3c-10781335757f";
-
-                            child["xaxis"] = 0;
-                            child["yaxis"] = 0;
-
-                            // Add to childs array
-                            ((JArray)childs["childs"]).Add(child);
-                        }
-
-                        // Add to main and add other stuff
-                        JObject j = new();
-                        j["bodies"] = new JArray();
-                        j["version"] = 3;
-                        ((JArray)j["bodies"]).Add(childs);
-
-
-                        Debug.WriteLine(x);
-
-                        File.WriteAllText($@"{path}\blueprint.json", JsonConvert.SerializeObject(j, Formatting.None));
-                        Working = false;
-                        OpenInfoDialog($"Blueprint {name} created! Size: {bm.Width}x{bm.Height} (Numbers may be different from input due to keeping aspect ratio)");
-
-                        Invoke(new MethodInvoker(delegate () { w.Dispose(); }));
-                        Invoke(new MethodInvoker(delegate () { this.Enabled = true; Focus(); }));
-                    });
-                }
-                bn.Dispose();
-            }
-            else
-            {
-                OpenInfoDialog("Please select an image");
-            }
-        }*/
-
         private void CreateBlueprint_Click(object sender, EventArgs e)
         {
-
             string uuid = Guid.NewGuid().ToString();
 
             string userPath = @$"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\Axolot Games\Scrap Mechanic\User";
+            //string userPath = @"SM";
             string path = $@"{Directory.GetDirectories(userPath)[0]}\Blueprints\{uuid}";
 
             Directory.CreateDirectory(path);
 
-            BlueprintDescription bd = new("Just a test", uuid, "Test 1");
+            Bitmap reference = Rescale(new Bitmap(ImagePath), 256, 256);
+
+            BlueprintName bpn = new BlueprintName();
+            if (bpn.ShowDialog() != DialogResult.OK) return;
+            BlueprintDescription bd = new($"Blueprint created using SMBIC. The blueprint is {reference.Width}x{reference.Height}px.", uuid, bpn.NameBlu);
 
             Blueprint bp = new(4);
 
             BlueprintBody body1 = new();
 
-            for (int x = 0; x < 8; x++)
+            for (int x = 0; x < reference.Width; x++)
             {
-                for (int y = 0; y < 8; y++)
+                for (int y = 0; y < reference.Height; y++)
                 {
-                    body1.childs.Add(new BlueprintChild(new Vector3(1, 1, 1), GenerateColor(), new Vector3(x, y, 0), "a6c6ce30-dd47-4587-b475-085d55c6a3b4", 0, 0));
+                    body1.childs.Add(new BlueprintChild(new Vector3(1, 1, 1), reference.GetPixel(x, y).ToHex(), new Vector3(x, y, 0), "a6c6ce30-dd47-4587-b475-085d55c6a3b4", 0, 0));
                 }
             }
 
@@ -182,6 +69,9 @@ namespace SMBlueprintImageCreator
 
             File.WriteAllText($@"{path}\description.json", JsonConvert.SerializeObject(bd));
             File.WriteAllText($@"{path}\blueprint.json", JsonConvert.SerializeObject(bp));
+            reference.Save($@"{path}\icon.png");
+            reference.Dispose();
+            GC.Collect();
         }
 
         private Random rnd = new Random();
