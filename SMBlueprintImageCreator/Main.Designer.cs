@@ -71,7 +71,7 @@ namespace SMBlueprintImageCreator
             // 
             this.Width.Location = new System.Drawing.Point(290, 81);
             this.Width.Maximum = new decimal(new int[] {
-            256,
+            500000,
             0,
             0,
             0});
@@ -89,7 +89,7 @@ namespace SMBlueprintImageCreator
             // 
             this.Height.Location = new System.Drawing.Point(416, 81);
             this.Height.Maximum = new decimal(new int[] {
-            256,
+            500000,
             0,
             0,
             0});

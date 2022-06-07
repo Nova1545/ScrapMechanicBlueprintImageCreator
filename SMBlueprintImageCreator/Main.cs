@@ -13,6 +13,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Diagnostics;
+using SMBlueprintImageCreator.BlueprintTools.JsonDataTypes;
+using SMBlueprintImageCreator.BlueprintTools;
 
 namespace SMBlueprintImageCreator
 {
@@ -33,7 +36,7 @@ namespace SMBlueprintImageCreator
             GameDirDialog.SelectedPath = "";
         }
 
-        private void CreateBlueprint_Click(object sender, EventArgs e)
+        /*private void CreateBlueprint_Click(object sender, EventArgs e)
         {
             if (LoadedImage)
             {
@@ -132,6 +135,8 @@ namespace SMBlueprintImageCreator
                         ((JArray)j["bodies"]).Add(childs);
 
 
+                        Debug.WriteLine(x);
+
                         File.WriteAllText($@"{path}\blueprint.json", JsonConvert.SerializeObject(j, Formatting.None));
                         Working = false;
                         OpenInfoDialog($"Blueprint {name} created! Size: {bm.Width}x{bm.Height} (Numbers may be different from input due to keeping aspect ratio)");
@@ -146,6 +151,43 @@ namespace SMBlueprintImageCreator
             {
                 OpenInfoDialog("Please select an image");
             }
+        }*/
+
+        private void CreateBlueprint_Click(object sender, EventArgs e)
+        {
+
+            string uuid = Guid.NewGuid().ToString();
+
+            string userPath = @$"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\Axolot Games\Scrap Mechanic\User";
+            string path = $@"{Directory.GetDirectories(userPath)[0]}\Blueprints\{uuid}";
+
+            Directory.CreateDirectory(path);
+
+            BlueprintDescription bd = new("Just a test", uuid, "Test 1");
+
+            Blueprint bp = new(4);
+
+            BlueprintBody body1 = new();
+
+            for (int x = 0; x < 8; x++)
+            {
+                for (int y = 0; y < 8; y++)
+                {
+                    body1.childs.Add(new BlueprintChild(new Vector3(1, 1, 1), GenerateColor(), new Vector3(x, y, 0), "a6c6ce30-dd47-4587-b475-085d55c6a3b4", 0, 0));
+                }
+            }
+
+
+            bp.bodies.Add(body1);
+
+            File.WriteAllText($@"{path}\description.json", JsonConvert.SerializeObject(bd));
+            File.WriteAllText($@"{path}\blueprint.json", JsonConvert.SerializeObject(bp));
+        }
+
+        private Random rnd = new Random();
+        private string GenerateColor()
+        {
+            return rnd.Next(0, 255).ToString("X2") + rnd.Next(0, 255).ToString("X2") + rnd.Next(0, 255).ToString("X2");
         }
 
         private void LoadImage_Click(object sender, EventArgs e)
@@ -172,8 +214,8 @@ namespace SMBlueprintImageCreator
             else
                 nPercent = nPercentW;
 
-            int destWidth = (int)(sWidth * nPercent);
-            int destHeight = (int)(sHeight * nPercent);
+            int destWidth = (int)(sWidth * nPercentW);
+            int destHeight = (int)(sHeight * nPercentH);
             Bitmap b = new(destWidth, destHeight);
             Graphics g = Graphics.FromImage(b);
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
@@ -266,7 +308,7 @@ namespace SMBlueprintImageCreator
                         JsonSerializer js = new();
                         Blocks = js.Deserialize<List<Block>>(s);
                     }
-                    else if (UserSettings.Default.FirstLaunch)
+                    else if (UserSettings.Default.FirstLaunch || !File.Exists("BlocksCache.json"))
                     {
                         string gd = UserSettings.Default.GameDir;
                         JObject creativeBlockData = JObject.Parse(File.ReadAllText($@"{gd}\Data\Objects\Database\ShapeSets\blocks.json"));
