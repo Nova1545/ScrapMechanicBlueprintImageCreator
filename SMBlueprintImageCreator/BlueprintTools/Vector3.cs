@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SMBlueprintImageCreator.BlueprintTools
 {
-    struct Vector3
+    public struct Vector3
     {
         public int x { get; private set; }
         public int y { get; private set; }

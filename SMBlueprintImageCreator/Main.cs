@@ -21,76 +21,146 @@ namespace SMBlueprintImageCreator
 {
     public partial class Main : Form
     {
-        bool LoadedImage = false;
-        bool Working = false;
         string ImagePath;
-        List<Block> Blocks;
+        Dictionary<string, string> Blocks;
+        ArgumentsParser Par;
 
-        public Main()
+        public Main(ArgumentsParser parser)
         {
+            Par = parser;
             InitializeComponent();
             OpenImage.Filter = "Image Files(*.PNG;*.JPG)|*.PNG;*.JPG|All files (*.*)|*.*";
             OpenImage.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.CommonPictures);
             OpenImage.FileName = "";
             GameDirDialog.RootFolder = Environment.SpecialFolder.ProgramFiles;
             GameDirDialog.SelectedPath = "";
+
+            if (parser.HasArg("--debug"))
+            {
+                if (parser.HasArg("--x")) Debug(0, parser.GetArg("--uuid"), new Vector3(int.Parse(parser.GetArg("--x")), int.Parse(parser.GetArg("--y")), 0), parser.HasArg("--rnd"));
+                else Debug(int.Parse(parser.GetArg("--count")), parser.GetArg("--uuid"), rndColor: parser.HasArg("--rnd"));
+            }
+        }
+
+        private Random rnd = new();
+        private void Debug(int count, string uuid = "", Vector3? dim2 = null, bool rndColor = false)
+        {
+            int limit = Par.HasArg("--limit") ? int.Parse(Par.GetArg("--limit")) : int.MaxValue;
+
+            if (string.IsNullOrEmpty(uuid)) uuid = Guid.NewGuid().ToString();
+
+            string userPath = @$"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\Axolot Games\Scrap Mechanic\User";
+            string path = $@"{Directory.GetDirectories(userPath)[0]}\Blueprints\{uuid}";
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            BlueprintName bpn = new();
+            BlueprintDescription bd = new($"Blueprint created using SMBIC", uuid, "Hot Reload");
+
+            Blueprint bp = new(4);
+
+            BlueprintBody body = new();
+
+            Vector3 dim = Util.GetXY(count);
+            if (dim2 != null) dim = (Vector3)dim2;
+
+            int totalBlocks = 0;
+
+            if (!Par.HasArg("--bounds"))
+            {
+ 
+                for (int x = 0; x < dim.x; x++)
+                {
+                    if (totalBlocks >= limit) break;
+                    for (int y = 0; y < dim.y; y++)
+                    {
+                        if (totalBlocks >= limit) break;
+                        string color = rndColor? Color.FromArgb(rnd.Next(0, 255), rnd.Next(0, 255), rnd.Next(0, 255)).ToHex() : "EEEEEE";
+                        body.childs.Add(new BlueprintChild(new Vector3(1, 1, 1), color, new Vector3(x, y, 0), "628b2d61-5ceb-43e9-8334-a4135566df7a", 0, 0));
+                        totalBlocks++;
+                    }
+                }
+            }
+            else
+            {
+                totalBlocks = dim.y * dim.x;
+                string color = (rndColor) ? Color.FromArgb(rnd.Next(0, 255), rnd.Next(0, 255), rnd.Next(0, 255)).ToHex() : "EEEEEE";
+                body.childs.Add(new BlueprintChild(new Vector3(dim.x, dim.y, 1), color, new Vector3(0, 0, 0), "628b2d61-5ceb-43e9-8334-a4135566df7a", 0, 0));
+            }
+
+            bp.bodies.Add(body);
+
+            File.WriteAllText($@"{path}\description.json", JsonConvert.SerializeObject(bd));
+            File.WriteAllText($@"{path}\blueprint.json", JsonConvert.SerializeObject(bp));
+            Console.WriteLine($"Blueprint created with uuid: {uuid}\nSize: {dim.x}x{dim.y}\nBlock Count: {dim.x * dim.y} (Limited: {totalBlocks})");
+            Environment.Exit(0);
         }
 
         private void CreateBlueprint_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(ImagePath))
+            {
+                MessageBox.Show("No image loaded!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (BlockType.Items.Count == 0 || string.IsNullOrEmpty(BlockType.Text))
+            {
+                MessageBox.Show("No block types loaded", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             string uuid = Guid.NewGuid().ToString();
 
+            string block_uuid = Blocks.Where(x => x.Value == BlockType.Text).First().Key;
+
             string userPath = @$"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\Axolot Games\Scrap Mechanic\User";
-            //string userPath = @"SM";
             string path = $@"{Directory.GetDirectories(userPath)[0]}\Blueprints\{uuid}";
 
             Directory.CreateDirectory(path);
 
-            Bitmap reference = Rescale(new Bitmap(ImagePath), 256, 256);
+            Bitmap reference = Rescale(new Bitmap(ImagePath), (int)Width.Value, (int)Height.Value);
 
-            BlueprintName bpn = new BlueprintName();
+            BlueprintName bpn = new();
             if (bpn.ShowDialog() != DialogResult.OK) return;
             BlueprintDescription bd = new($"Blueprint created using SMBIC. The blueprint is {reference.Width}x{reference.Height}px.", uuid, bpn.NameBlu);
 
             Blueprint bp = new(4);
 
-            BlueprintBody body1 = new();
+            BlueprintBody body = new();
 
             for (int x = 0; x < reference.Width; x++)
             {
                 for (int y = 0; y < reference.Height; y++)
                 {
-                    body1.childs.Add(new BlueprintChild(new Vector3(1, 1, 1), reference.GetPixel(x, y).ToHex(), new Vector3(x, y, 0), "a6c6ce30-dd47-4587-b475-085d55c6a3b4", 0, 0));
+                    body.childs.Add(new BlueprintChild(new Vector3(1, 1, 1), reference.GetPixel(x, y).ToHex(), new Vector3(x, y, 0), block_uuid, 0, 0));
                 }
             }
 
-
-            bp.bodies.Add(body1);
+            bp.bodies.Add(body);
 
             File.WriteAllText($@"{path}\description.json", JsonConvert.SerializeObject(bd));
             File.WriteAllText($@"{path}\blueprint.json", JsonConvert.SerializeObject(bp));
             reference.Save($@"{path}\icon.png");
             reference.Dispose();
-            GC.Collect();
-        }
 
-        private Random rnd = new Random();
-        private string GenerateColor()
-        {
-            return rnd.Next(0, 255).ToString("X2") + rnd.Next(0, 255).ToString("X2") + rnd.Next(0, 255).ToString("X2");
+            MessageBox.Show("Blueprint created!");
         }
 
         private void LoadImage_Click(object sender, EventArgs e)
         {
             if (OpenImage.ShowDialog() == DialogResult.OK)
             {
-                LoadedImage = true;
+                CreateBlueprint.Enabled = true;
                 ImagePath = OpenImage.FileName;
-                pictureBox1.Image = Rescale(new Bitmap(ImagePath), 128, 128);
+                Bitmap bm = Rescale(new Bitmap(ImagePath), (int)Width.Value, (int)Height.Value);
+                pictureBox1.Image = bm;
+                BlueprintSize.Text = $"Size: {bm.Width}x{bm.Height}px";
             }
         }
 
-        private static Bitmap Rescale(Bitmap bm, int width, int height)
+        private Bitmap Rescale(Bitmap bm, int width, int height)
         {
             int sHeight = bm.Height;
             int sWidth = bm.Width;
@@ -104,8 +174,15 @@ namespace SMBlueprintImageCreator
             else
                 nPercent = nPercentW;
 
-            int destWidth = (int)(sWidth * nPercentW);
-            int destHeight = (int)(sHeight * nPercentH);
+            int destWidth = (int)(sWidth * nPercent);
+            int destHeight = (int)(sHeight * nPercent);
+
+            if (!Aspect.Checked)
+            {
+                destWidth = (int)(sWidth * nPercentW);
+                destHeight = (int)(sHeight * nPercentH);
+            }
+
             Bitmap b = new(destWidth, destHeight);
             Graphics g = Graphics.FromImage(b);
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
@@ -130,42 +207,6 @@ namespace SMBlueprintImageCreator
             g.DrawImage(bm, 0, 0, destWidth, destHeight);
             g.Dispose();
             return b;
-        }
-
-        private static List<ChunkInfo> FindSquareOfSimilarPixels(Bitmap bm)
-        {
-            List<ChunkInfo> Chunks = new();
-
-            int p = 1;
-            Color c = bm.GetPixel(0, 0);
-            ChunkInfo cf = new(0, 0, c);
-
-            for (int y = 0; y < bm.Height; y++)
-            {
-                for (int x = 1; x < bm.Width; x++)
-                {
-                    if (bm.GetPixel(x, y).ToArgb() == c.ToArgb())
-                    {
-                        p++;
-                    }
-                    else
-                    {
-                        cf.Length = p;
-                        cf.Color = c;
-                        Chunks.Add(cf);
-                        c = bm.GetPixel(x, y);
-                        cf = new(x, y, c);
-                        p = 1;
-                    }
-                }
-                cf.Length = p;
-                cf.Color = c;
-                Chunks.Add(cf);
-                c = bm.GetPixel(0, y);
-                cf = new(0, y, c);
-                p = 1;
-            }
-            return Chunks;
         }
 
         private void SetGameDirBtn_Click(object sender, EventArgs e)
@@ -196,7 +237,7 @@ namespace SMBlueprintImageCreator
                         using StringReader sr = new(File.ReadAllText("BlocksCache.json"));
                         using JsonReader s = new JsonTextReader(sr);
                         JsonSerializer js = new();
-                        Blocks = js.Deserialize<List<Block>>(s);
+                        Blocks = js.Deserialize<Dictionary<string, string>>(s);
                     }
                     else if (UserSettings.Default.FirstLaunch || !File.Exists("BlocksCache.json"))
                     {
@@ -211,14 +252,14 @@ namespace SMBlueprintImageCreator
                         {
                             string uuid = (string)block["uuid"];
                             string displayName = (string)creativeBlockNames[uuid]["title"];
-                            Blocks.Add(new Block(uuid, displayName));
+                            Blocks.Add(uuid, displayName);
                         }
 
                         foreach (JObject block in survivalBlockData["blockList"])
                         {
                             string uuid = (string)block["uuid"];
                             string displayName = (string)survivalBlockNames[uuid]["title"];
-                            Blocks.Add(new Block(uuid, displayName));
+                            Blocks.Add(uuid, displayName);
                         }
 
                         using StreamWriter s = File.CreateText("BlocksCache.json");
@@ -226,7 +267,13 @@ namespace SMBlueprintImageCreator
                         js.Serialize(s, Blocks);
                     }
 
-                    Invoke(new MethodInvoker(delegate () { BlockType.Items.AddRange(Blocks.Select(x => x.Name).ToArray()); }));
+                    Invoke(new MethodInvoker(delegate () {
+                        BlockType.Items.AddRange(Blocks.Select(x => x.Value).ToArray());
+                        if (BlockType.Items.Count > 0)
+                        {
+                            BlockType.SelectedIndex = 0;
+                        }
+                    }));
                     Invoke(new MethodInvoker(delegate () { w.Dispose(); }));
                     Invoke(new MethodInvoker(delegate () { Enabled = true; Focus(); }));
 
@@ -265,8 +312,22 @@ namespace SMBlueprintImageCreator
 
         private void SizeValueChanged(object sender, EventArgs e)
         {
-            if (LoadedImage)
-                pictureBox1.Image = Rescale(new Bitmap(ImagePath), (int)Width.Value, (int)Height.Value);
+            if (!string.IsNullOrEmpty(ImagePath))
+            {
+                Bitmap bm = Rescale(new Bitmap(ImagePath), (int)Width.Value, (int)Height.Value);
+                pictureBox1.Image = bm;
+                BlueprintSize.Text = $"Size: {bm.Width}x{bm.Height}px";
+            }
+        }
+
+        private void Aspect_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(ImagePath))
+            {
+                Bitmap bm = Rescale(new Bitmap(ImagePath), (int)Width.Value, (int)Height.Value);
+                pictureBox1.Image = bm;
+                BlueprintSize.Text = $"Size: {bm.Width}x{bm.Height}px";
+            }
         }
     }
 }

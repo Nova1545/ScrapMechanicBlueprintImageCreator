@@ -13,5 +13,17 @@ namespace SMBlueprintImageCreator.BlueprintTools
         {
             return color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
         }
+
+        public static Vector3 GetXY(int count)
+        {
+            for (int i = 24; i < count; i++)
+            {
+                if (count % i == 0)
+                {
+                    return new Vector3(count / i, i, 0);
+                }
+            }
+            return new Vector3(0, 0, 0);
+        }
     }
 }

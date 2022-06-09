@@ -42,6 +42,8 @@ namespace SMBlueprintImageCreator
             this.BlockType = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.Reset = new System.Windows.Forms.Button();
+            this.BlueprintSize = new System.Windows.Forms.Label();
+            this.Aspect = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Width)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Height)).BeginInit();
@@ -71,7 +73,7 @@ namespace SMBlueprintImageCreator
             // 
             this.Width.Location = new System.Drawing.Point(290, 81);
             this.Width.Maximum = new decimal(new int[] {
-            500000,
+            256,
             0,
             0,
             0});
@@ -89,7 +91,7 @@ namespace SMBlueprintImageCreator
             // 
             this.Height.Location = new System.Drawing.Point(416, 81);
             this.Height.Maximum = new decimal(new int[] {
-            500000,
+            256,
             0,
             0,
             0});
@@ -125,8 +127,9 @@ namespace SMBlueprintImageCreator
             // 
             // CreateBlueprint
             // 
+            this.CreateBlueprint.Enabled = false;
             this.CreateBlueprint.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.CreateBlueprint.Location = new System.Drawing.Point(365, 206);
+            this.CreateBlueprint.Location = new System.Drawing.Point(290, 206);
             this.CreateBlueprint.Name = "CreateBlueprint";
             this.CreateBlueprint.Size = new System.Drawing.Size(211, 63);
             this.CreateBlueprint.TabIndex = 6;
@@ -177,11 +180,33 @@ namespace SMBlueprintImageCreator
             this.Reset.UseVisualStyleBackColor = true;
             this.Reset.Click += new System.EventHandler(this.Reset_Click);
             // 
+            // BlueprintSize
+            // 
+            this.BlueprintSize.AutoSize = true;
+            this.BlueprintSize.Location = new System.Drawing.Point(13, 275);
+            this.BlueprintSize.Name = "BlueprintSize";
+            this.BlueprintSize.Size = new System.Drawing.Size(64, 15);
+            this.BlueprintSize.TabIndex = 11;
+            this.BlueprintSize.Text = "Size: 0x0px";
+            // 
+            // Aspect
+            // 
+            this.Aspect.AutoSize = true;
+            this.Aspect.Location = new System.Drawing.Point(542, 85);
+            this.Aspect.Name = "Aspect";
+            this.Aspect.Size = new System.Drawing.Size(91, 19);
+            this.Aspect.TabIndex = 12;
+            this.Aspect.Text = "Keep Aspect";
+            this.Aspect.UseVisualStyleBackColor = true;
+            this.Aspect.CheckedChanged += new System.EventHandler(this.Aspect_CheckedChanged);
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(671, 285);
+            this.ClientSize = new System.Drawing.Size(671, 299);
+            this.Controls.Add(this.Aspect);
+            this.Controls.Add(this.BlueprintSize);
             this.Controls.Add(this.Reset);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.BlockType);
@@ -219,6 +244,8 @@ namespace SMBlueprintImageCreator
         private System.Windows.Forms.ComboBox BlockType;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button Reset;
+        private System.Windows.Forms.Label BlueprintSize;
+        private System.Windows.Forms.CheckBox Aspect;
     }
 }
 
