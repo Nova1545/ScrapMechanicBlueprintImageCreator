@@ -1,3 +1,7 @@
+# Disclaimer
+Everything in this repo is no longer maintained. I wrote this tool years ago when I played the game. I no longer play and will not be updating this
+Feel free to fork my messy code and do with it what you would like
+
 # ScrapMechanicBlueprintImageCreator
 Takes images and turns them into blueprints you can then spawn in your Scrap Mechanic World
 
